@@ -10,7 +10,7 @@ Chapters need to be folders named with the following naming scheme:
 * 004 - Vol.02 Ch.001
 
 This becomes:
-* Volume 01
+* FolderNameContainingChapters - Volume 01
   * 001 Some page from chapter 001 - 1.jpg
   * 001 Some page from chapter 001 - 2.jpg
   * 002 Some page from chapter 002 - 1.jpg
