@@ -11,14 +11,14 @@ import static java.util.function.Predicate.not;
 
 public final class Main {
 
-    private static final Pattern VOLUME_REGEX = Pattern.compile("[\\d]+ - Vol\\.([\\d.]+) Ch\\.([\\d.]+)");
+    private static final Pattern VOLUME_REGEX = Pattern.compile("[\\d]+ - Vol\\.([\\d.]+) Ch\\.([\\d.]+).*");
 
     public static void main(final String[] args) {
         final Path base = Path.of(".");
         try (final Stream<Path> chapters = Files.walk(base, 1)) {
             chapters.filter(not(base::equals))
                     .filter(Files::isDirectory)
-                    .filter(Main::isVolume)
+                    .filter(Main::isNotVolume)
                     .forEach(Main::handleChapter);
         } catch (final IOException e) {
             System.err.println("Could not handle chapters [" + e.getClass().getSimpleName() + "]: " + e.getMessage());
@@ -60,8 +60,8 @@ public final class Main {
         }
     }
 
-    private static boolean isVolume(final Path chapter) {
-        return chapter.getFileName().toString().toLowerCase().startsWith("vol");
+    private static boolean isNotVolume(final Path chapter) {
+        return !chapter.getFileName().toString().toLowerCase().startsWith("vol");
     }
 
 }
