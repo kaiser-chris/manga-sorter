@@ -14,7 +14,7 @@ public final class Main {
     private static final Pattern VOLUME_REGEX = Pattern.compile("[\\d]+ - Vol\\.([\\d.]+) Ch\\.([\\d.]+).*");
 
     public static void main(final String[] args) {
-        final Path base = Path.of(".");
+        final Path base = Path.of("");
         try (final Stream<Path> chapters = Files.walk(base, 1)) {
             chapters.filter(not(base::equals))
                     .filter(Files::isDirectory)
@@ -33,7 +33,7 @@ public final class Main {
         final String volume = matcher.group(1);
         final String chapter = matcher.group(2);
 
-        final Path volumeDirectory = Path.of("Volume " + volume);
+        final Path volumeDirectory = Path.of(chapterDirectory.toAbsolutePath().getParent().getFileName().toString() + " - Volume " + volume);
         if (!volumeDirectory.toFile().exists()) {
             try {
                 Files.createDirectories(volumeDirectory);
