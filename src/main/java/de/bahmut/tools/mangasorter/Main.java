@@ -1,6 +1,5 @@
 package de.bahmut.tools.mangasorter;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Matcher;
@@ -11,7 +10,7 @@ import static java.util.function.Predicate.not;
 
 public final class Main {
 
-    private static final Pattern VOLUME_REGEX = Pattern.compile("[\\d]+ - Vol\\.([\\d.]+) Ch\\.([\\d.]+).*");
+    private static final Pattern VOLUME_REGEX = Pattern.compile("[\\d]+ - (?:Vol\\.|Volume )([\\d.]+) (?:Ch\\.|Chapter )([\\d.]+).*");
 
     public static void main(final String[] args) {
         final Path base = Path.of("");
@@ -20,7 +19,7 @@ public final class Main {
                     .filter(Files::isDirectory)
                     .filter(Main::isNotVolume)
                     .forEach(Main::handleChapter);
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             System.err.println("Could not handle chapters [" + e.getClass().getSimpleName() + "]: " + e.getMessage());
         }
     }
@@ -37,7 +36,7 @@ public final class Main {
         if (!volumeDirectory.toFile().exists()) {
             try {
                 Files.createDirectories(volumeDirectory);
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 System.err.println("Could not create volume directory " + volumeDirectory + " [" + e.getClass().getSimpleName() + "]: " + e.getMessage());
             }
         }
@@ -47,7 +46,7 @@ public final class Main {
                     .filter(Files::isRegularFile)
                     .forEach(page -> handlePage(page, volumeDirectory, chapter));
             Files.delete(chapterDirectory);
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             System.err.println("Could not handle chapter " + chapter + " pages [" + e.getClass().getSimpleName() + "]: " + e.getMessage());
         }
     }
@@ -55,7 +54,7 @@ public final class Main {
     private static void handlePage(final Path page, final Path volume, final String chapter) {
         try {
             Files.move(page, Path.of(volume.toString(), chapter + " - " + page.getFileName().toString()));
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             System.err.println("Could not move page " + page + " [" + e.getClass().getSimpleName() + "]: " + e.getMessage());
         }
     }
