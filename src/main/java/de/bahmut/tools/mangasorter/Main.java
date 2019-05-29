@@ -12,8 +12,11 @@ public final class Main {
 
     private static final Pattern VOLUME_REGEX = Pattern.compile(".*(?:Vol\\.|Volume )([\\d.]+).*");
 
+    private static String parentDirectoryName;
+
     public static void main(final String[] args) {
         final Path base = Path.of("");
+        parentDirectoryName = base.toAbsolutePath().getFileName().toString();
         try (final Stream<Path> chapters = Files.walk(base, 1)) {
             chapters.filter(not(base::equals))
                     .filter(Files::isDirectory)
@@ -29,9 +32,10 @@ public final class Main {
         if (!matcher.matches()) {
             return;
         }
-        final String volume = matcher.group(1);
 
-        final Path volumeDirectory = Path.of(chapterDirectory.toAbsolutePath().getParent().getFileName().toString() + " - Volume " + volume);
+        final int volume = Integer.parseInt(matcher.group(1));
+        final String volumeDirectoryName = String.format("%s - Volume %02d", parentDirectoryName, volume);
+        final Path volumeDirectory = Path.of(volumeDirectoryName);
         if (!volumeDirectory.toFile().exists()) {
             try {
                 Files.createDirectories(volumeDirectory);
@@ -50,7 +54,7 @@ public final class Main {
     }
 
     private static boolean isNotVolume(final Path chapter) {
-        return !chapter.getFileName().toString().toLowerCase().startsWith("vol");
+        return !chapter.getFileName().toString().startsWith(parentDirectoryName + " - Volume ");
     }
 
 }
