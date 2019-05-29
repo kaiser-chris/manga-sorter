@@ -10,7 +10,7 @@ import static java.util.function.Predicate.not;
 
 public final class Main {
 
-    private static final Pattern VOLUME_REGEX = Pattern.compile("[\\d]+ - (?:Vol\\.|Volume )([\\d.]+) (?:Ch\\.|Chapter )([\\d.]+).*");
+    private static final Pattern VOLUME_REGEX = Pattern.compile(".*(?:Vol\\.|Volume )([\\d.]+).*");
 
     public static void main(final String[] args) {
         final Path base = Path.of("");
@@ -30,7 +30,6 @@ public final class Main {
             return;
         }
         final String volume = matcher.group(1);
-        final String chapter = matcher.group(2);
 
         final Path volumeDirectory = Path.of(chapterDirectory.toAbsolutePath().getParent().getFileName().toString() + " - Volume " + volume);
         if (!volumeDirectory.toFile().exists()) {
@@ -41,21 +40,12 @@ public final class Main {
             }
         }
 
-        try (final Stream<Path> pages = Files.walk(chapterDirectory, 1)) {
-            pages.filter(not(chapterDirectory::equals))
-                    .filter(Files::isRegularFile)
-                    .forEach(page -> handlePage(page, volumeDirectory, chapter));
-            Files.delete(chapterDirectory);
-        } catch (final Exception e) {
-            System.err.println("Could not handle chapter " + chapter + " pages [" + e.getClass().getSimpleName() + "]: " + e.getMessage());
-        }
-    }
-
-    private static void handlePage(final Path page, final Path volume, final String chapter) {
+        final String chapterDirectoryName = chapterDirectory.getFileName().toString();
+        final Path volumeChapterDirectory = Path.of(volumeDirectory.toString(), chapterDirectoryName);
         try {
-            Files.move(page, Path.of(volume.toString(), chapter + " - " + page.getFileName().toString()));
+            Files.move(chapterDirectory, volumeChapterDirectory);
         } catch (final Exception e) {
-            System.err.println("Could not move page " + page + " [" + e.getClass().getSimpleName() + "]: " + e.getMessage());
+            System.err.println("Could not move chapter " + chapterDirectoryName + " to volume " + volume + " [" + e.getClass().getSimpleName() + "]: " + e.getMessage());
         }
     }
 
